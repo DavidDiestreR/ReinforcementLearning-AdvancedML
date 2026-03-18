@@ -1,1 +1,2 @@
-# action = policy(state)
+# action = policy(state, Q, epsilon)
+# so each state (x, y, vx, vy) has 9 possible actions (to increase vx by one, decrease it by -1 or keep it 0 and same for y). Meaning that we need to keep a table where for each state we give points to each of those 9 actions and our policy chooses the best one with probability epsilon to choose a worse one
