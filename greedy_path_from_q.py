@@ -15,10 +15,10 @@ def build_parser():
         help="Path to the Q-table relative to output/, e.g. grid_1/q_mc_episodes_1000_gamma_0_9_epsilon_0_1.pkl",
     )
     parser.add_argument(
-        "--seed",
+        "--start-x",
         type=int,
         default=None,
-        help="Optional seed for selecting the initial start cell.",
+        help="Starting x position. If omitted, a random start cell is used.",
     )
     return parser
 
@@ -38,8 +38,23 @@ def infer_grid_path(q_file):
     return grid_path
 
 
-def run_greedy_episode(env, q):
-    state = env.reset()
+def get_start_state(env, start_x):
+    if start_x is None:
+        return env.reset()
+
+    valid_x_positions = sorted(x for x, _ in env.start_cells)
+
+    if start_x not in valid_x_positions:
+        raise ValueError(
+            f"Starting x position {start_x} is not valid. Allowed x positions: {valid_x_positions}"
+        )
+
+    start_y = next(y for x, y in env.start_cells if x == start_x)
+    return (start_x, start_y, 0, 0)
+
+
+def run_greedy_episode(env, q, start_state):
+    state = start_state
     path = [state]
 
     while True:
@@ -74,9 +89,10 @@ def main():
 
     q = load_q_table(q_file)
     grid_path = infer_grid_path(q_file)
-    env = GridEnvironment(grid_path, seed=args.seed)
+    env = GridEnvironment(grid_path)
+    start_state = get_start_state(env, args.start_x)
 
-    path, final_reward = run_greedy_episode(env, q)
+    path, final_reward = run_greedy_episode(env, q, start_state)
     output_path = build_output_path(q_file)
     save_path(
         output_path,
@@ -85,6 +101,7 @@ def main():
             "q_path": str(q_file),
             "path": path,
             "final_reward": final_reward,
+            "start_state": start_state,
         },
     )
 

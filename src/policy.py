@@ -1,8 +1,15 @@
 import random
 
-def greedy_policy(state, q):
+
+def _best_actions(state, q):
     actions = list(q[state].keys())
-    return max(actions, key=lambda action: q[state][action])
+    best_value = max(q[state][action] for action in actions)
+    return [action for action in actions if q[state][action] == best_value]
+
+
+def greedy_policy(state, q):
+    return _best_actions(state, q)[0]
+
 
 def epsilon_greedy_policy(state, q, epsilon):
     actions = list(q[state].keys())
