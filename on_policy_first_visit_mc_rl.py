@@ -43,6 +43,29 @@ def get_epsilon(episode_number, num_episodes, epsilon_start, epsilon_min):
     return max(epsilon_min, epsilon_start - (epsilon_start - epsilon_min) * progress)
 
 
+def update_q_first_visit(episode, returns_sum, returns_count, q, gamma):
+    returns_from_t = [0.0] * len(episode)
+    g = 0.0
+
+    for index in range(len(episode) - 1, -1, -1):
+        _, _, reward = episode[index]
+        g = gamma * g + reward
+        returns_from_t[index] = g
+
+    seen = set()
+
+    for index, (state, action, _) in enumerate(episode):
+        state_action = (state, action)
+
+        if state_action in seen:
+            continue
+
+        seen.add(state_action)
+        returns_sum[state_action] = returns_sum.get(state_action, 0.0) + returns_from_t[index]
+        returns_count[state_action] = returns_count.get(state_action, 0) + 1
+        q[state][action] = returns_sum[state_action] / returns_count[state_action]
+
+
 def on_policy_first_visit_mc_control(
     gridfilename="grid_1.csv",
     gamma=0.9,
@@ -53,25 +76,15 @@ def on_policy_first_visit_mc_control(
     grid_path = Path("data") / "grids" / gridfilename
     env = GridEnvironment(grid_path)
     q = initialize_q(env)
-    returns = {}
+    returns_sum = {}
+    returns_count = {}
     max_steps = env.width * env.height * 100
     start_time = time.perf_counter()
 
     for episode_number in range(1, num_episodes + 1):
         current_epsilon = get_epsilon(episode_number, num_episodes, epsilon, epsilon_min)
         episode = generate_episode(env, q, current_epsilon, max_steps)
-        g = 0.0
-
-        for index in range(len(episode) - 1, -1, -1):
-            state, action, reward = episode[index]
-            g = gamma * g + reward
-            state_action = (state, action)
-
-            previous_state_actions = [(s, a) for s, a, _ in episode[:index]]
-
-            if state_action not in previous_state_actions:
-                returns.setdefault(state_action, []).append(g)
-                q[state][action] = sum(returns[state_action]) / len(returns[state_action])
+        update_q_first_visit(episode, returns_sum, returns_count, q, gamma)
 
         sys.stdout.write(f"\r[{episode_number}/{num_episodes}] epsilon={current_epsilon:.4f}")
         sys.stdout.flush()
