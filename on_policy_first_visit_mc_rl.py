@@ -5,7 +5,7 @@ import time
 from pathlib import Path
 
 from src.environment import GridEnvironment
-from src.policy import policy
+from src.policy import epsilon_greedy_policy
 
 
 def initialize_q(env):
@@ -27,7 +27,7 @@ def generate_episode(env, q, epsilon, max_steps):
     state = env.reset()
 
     for _ in range(max_steps):
-        action = policy(state, q, epsilon)
+        action = epsilon_greedy_policy(state, q, epsilon)
         next_state, reward, done = env.step(state, action)
         episode.append((state, action, reward))
         state = next_state
