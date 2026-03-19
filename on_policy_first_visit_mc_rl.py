@@ -47,6 +47,7 @@ def update_q_first_visit(episode, returns_sum, returns_count, q, gamma):
     returns_from_t = [0.0] * len(episode)
     g = 0.0
 
+    # We first get the vector of g's for each time step
     for index in range(len(episode) - 1, -1, -1):
         _, _, reward = episode[index]
         g = gamma * g + reward
@@ -54,6 +55,7 @@ def update_q_first_visit(episode, returns_sum, returns_count, q, gamma):
 
     seen = set()
 
+    # Then we update the Q-values for the first visit of each state-action pair
     for index, (state, action, _) in enumerate(episode):
         state_action = (state, action)
 
