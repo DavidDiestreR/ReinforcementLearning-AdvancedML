@@ -67,11 +67,11 @@ def on_policy_first_visit_mc_control(
             g = gamma * g + reward
             state_action = (state, action)
 
-            if state_action in [(s, a) for s, a, _ in episode[:index]]:
-                continue
+            previous_state_actions = [(s, a) for s, a, _ in episode[:index]]
 
-            returns.setdefault(state_action, []).append(g)
-            q[state][action] = sum(returns[state_action]) / len(returns[state_action])
+            if state_action not in previous_state_actions:
+                returns.setdefault(state_action, []).append(g)
+                q[state][action] = sum(returns[state_action]) / len(returns[state_action])
 
         sys.stdout.write(f"\r[{episode_number}/{num_episodes}] epsilon={current_epsilon:.4f}")
         sys.stdout.flush()
