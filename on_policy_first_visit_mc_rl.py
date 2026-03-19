@@ -43,28 +43,6 @@ def get_epsilon(episode_number, num_episodes, epsilon_start, epsilon_min):
     return max(epsilon_min, epsilon_start - (epsilon_start - epsilon_min) * progress)
 
 
-def update_q_first_visit(episode, returns, q, gamma):
-    returns_from_t = []
-    g = 0.0
-
-    for _, _, reward in reversed(episode):
-        g = gamma * g + reward
-        returns_from_t.append(g)
-
-    returns_from_t.reverse()
-    seen = set()
-
-    for (state, action, _), g in zip(episode, returns_from_t):
-        state_action = (state, action)
-
-        if state_action in seen:
-            continue
-
-        seen.add(state_action)
-        returns.setdefault(state_action, []).append(g)
-        q[state][action] = sum(returns[state_action]) / len(returns[state_action])
-
-
 def on_policy_first_visit_mc_control(
     gridfilename="grid_1.csv",
     gamma=0.9,
@@ -82,7 +60,18 @@ def on_policy_first_visit_mc_control(
     for episode_number in range(1, num_episodes + 1):
         current_epsilon = get_epsilon(episode_number, num_episodes, epsilon, epsilon_min)
         episode = generate_episode(env, q, current_epsilon, max_steps)
-        update_q_first_visit(episode, returns, q, gamma)
+        g = 0.0
+
+        for index in range(len(episode) - 1, -1, -1):
+            state, action, reward = episode[index]
+            g = gamma * g + reward
+            state_action = (state, action)
+
+            if state_action in [(s, a) for s, a, _ in episode[:index]]:
+                continue
+
+            returns.setdefault(state_action, []).append(g)
+            q[state][action] = sum(returns[state_action]) / len(returns[state_action])
 
         sys.stdout.write(f"\r[{episode_number}/{num_episodes}] epsilon={current_epsilon:.4f}")
         sys.stdout.flush()
