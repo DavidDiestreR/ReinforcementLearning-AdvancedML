@@ -1,2 +1,1 @@
-#state = env.reset()
-#next_state, reward, done = env.step(action)
+# next_state, reward, done = env.step(state, action)
