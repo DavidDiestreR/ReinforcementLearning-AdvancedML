@@ -17,8 +17,6 @@ ReinforcementLearning-AdvancedML/
 │  ├─ grid_1/
 │  ├─ grid_2/
 │  └─ grid_3/
-├─ project_files/
-│  └─ Project2.pdf
 ├─ src/
 │  ├─ environment.py
 │  ├─ policy.py
@@ -87,9 +85,9 @@ python on_policy_first_visit_mc_rl.py --gridfilename grid_1.csv --gamma 0.9 --nu
 Example configuration used in this project:
 
 ```bash
-python on_policy_first_visit_mc_rl.py --gridfilename grid_1.csv --epsilon 0.3 --num-episodes 1000000
-python on_policy_first_visit_mc_rl.py --gridfilename grid_2.csv --epsilon 0.3 --num-episodes 1000000
-python on_policy_first_visit_mc_rl.py --gridfilename grid_3.csv --epsilon 0.5 --num-episodes 1000000
+python on_policy_first_visit_mc_rl.py --gridfilename grid_1.csv --epsilon 0.4 --num-episodes 1000000
+python on_policy_first_visit_mc_rl.py --gridfilename grid_2.csv --epsilon 0.4 --num-episodes 1000000
+python on_policy_first_visit_mc_rl.py --gridfilename grid_3.csv --epsilon 0.4 --num-episodes 1000000
 ```
 
 For the full list of arguments:
@@ -105,7 +103,7 @@ After training, the learned Q-table is saved as a `.pkl` file inside `output/<gr
 Example output path:
 
 ```text
-output/grid_1/q_mc_episodes_1000000_gamma_0_9_epsilon_0_3.pkl
+output/grid_1/q_mc_episodes_1000000_gamma_0_9_epsilon_0_4.pkl
 ```
 
 These files can be loaded later for analysis and visualization in `notebooks/figures.ipynb`.
